@@ -14,29 +14,29 @@
 #define V_MINR 198
 #define V_MAXR 256
 
+// verde ( green )
+#define H_MINV 60
+#define H_MAXV 76
+#define S_MINV 30
+#define S_MAXV 219
+#define V_MINV 170
+#define V_MAXV 250
+
 // galben ( yellow )
-#define H_MING 63
-#define H_MAXG 94
-#define S_MING 173
+#define H_MING 
+#define H_MAXG 
+#define S_MING 
 #define S_MAXG 
 #define V_MING 
-#define V_MAXG
-
-// verde ( green )
-#define H_MINV 
-#define H_MAXV 
-#define S_MINV 
-#define S_MAXV 
-#define V_MINV 
-#define V_MAXV
+#define V_MAXG 
 
 // albastru ( blue )
-#define H_MINA 
-#define H_MAXA 
-#define S_MINA 
-#define S_MAXA 
-#define V_MINA 
-#define V_MAXA 
+#define H_MINA 92
+#define H_MAXA 255
+#define S_MINA 135
+#define S_MAXA 255
+#define V_MINA 176
+#define V_MAXA 255
 
 
 
@@ -244,7 +244,10 @@ int main(int argc, char* argv[])
 	//all of our operations will be performed within this loop
 
 
-
+  int xc1;
+  int xc2;
+  int yc1;
+  int yc2;
 	
 	while (1) {
 
@@ -261,7 +264,7 @@ int main(int argc, char* argv[])
 		  cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		  //filter HSV image between values and store filtered image to
 		  //threshold matrix
-		  inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+		  inRange(HSV, Scalar(H_MINV, S_MINV, V_MINV), Scalar(H_MAXV, S_MAXV, V_MAXV), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
 		  if (useMorphOps)
@@ -272,6 +275,23 @@ int main(int argc, char* argv[])
 		  if (trackObjects)
 			  trackFilteredObject(x, y, threshold, cameraFeed);
 
+      xc1 = x;
+      yc1 = y;
+      inRange(HSV, Scalar(H_MINA, S_MINA, V_MINA), Scalar(H_MAXA, S_MAXA, V_MAXA), threshold);
+		  //perform morphological operations on thresholded image to eliminate noise
+		  //and emphasize the filtered object(s)
+		  if (useMorphOps)
+			  morphOps(threshold);
+		  //pass in thresholded frame to our object tracking function
+		  //this function will return the x and y coordinates of the
+		  //filtered object
+		  if (trackObjects)
+			  trackFilteredObject(x, y, threshold, cameraFeed);
+
+      xc2 = x;
+      yc2 = y;
+      
+      cout<<xc1<<" "<<yc1<<"  "<<xc2<<" "<<yc2<<endl;
 		  //show frames
 		  imshow(windowName2, threshold);
 		  imshow(windowName, cameraFeed);
