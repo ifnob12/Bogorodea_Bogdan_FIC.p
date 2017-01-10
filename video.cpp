@@ -5,13 +5,16 @@
 #include "opencv2/highgui/highgui.hpp"
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
+#include <sys/types.h>
+#include <sys/socket.h>
+
 
 // rosu ( red )
-#define H_MINR 110
-#define H_MAXR 180
-#define S_MINR 94
+#define H_MINR 0
+#define H_MAXR 92
+#define S_MINR 136
 #define S_MAXR 239
-#define V_MINR 198
+#define V_MINR 249
 #define V_MAXR 256
 
 // verde ( green )
@@ -38,7 +41,21 @@
 #define V_MINA 176
 #define V_MAXA 255
 
+// alb ( white )
+#define H_MINALB 92
+#define H_MAXALB 255
+#define S_MINALB 135
+#define S_MAXALB 255
+#define V_MINALB 176
+#define V_MAXALB 255
 
+// centru tablei ( black )
+#define H_MINCEN 92
+#define H_MAXCEN 255
+#define S_MINCEN 135
+#define S_MAXCEN 255
+#define V_MINCEN 176
+#define V_MAXCEN 255
 
 
 using namespace std;
@@ -246,9 +263,18 @@ int main(int argc, char* argv[])
 
   int xc1;
   int xc2;
+  int xc3;
+  int xc4;
+  int xc5;
+  
   int yc1;
   int yc2;
-	
+  int yc3;
+  int yc4;
+  int yc5;
+  
+  // Socket socket = getSocket("TCP")
+  	
 	while (1) {
 
 
@@ -277,6 +303,7 @@ int main(int argc, char* argv[])
 
       xc1 = x;
       yc1 = y;
+      
       inRange(HSV, Scalar(H_MINA, S_MINA, V_MINA), Scalar(H_MAXA, S_MAXA, V_MAXA), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
@@ -291,7 +318,54 @@ int main(int argc, char* argv[])
       xc2 = x;
       yc2 = y;
       
-      cout<<xc1<<" "<<yc1<<"  "<<xc2<<" "<<yc2<<endl;
+      inRange(HSV, Scalar(H_MINR, S_MINR, V_MINR), Scalar(H_MAXR, S_MAXR, V_MAXR), threshold);
+		  //perform morphological operations on thresholded image to eliminate noise
+		  //and emphasize the filtered object(s)
+		  if (useMorphOps)
+			  morphOps(threshold);
+		  //pass in thresholded frame to our object tracking function
+		  //this function will return the x and y coordinates of the
+		  //filtered object
+		  if (trackObjects)
+			  trackFilteredObject(x, y, threshold, cameraFeed);
+
+      xc3 = x;
+      yc3 = y;
+      
+      inRange(HSV, Scalar(H_MINALB, S_MINALB, V_MINALB), Scalar(H_MAXALB, S_MAXALB, V_MAXALB), threshold);
+		  //perform morphological operations on thresholded image to eliminate noise
+		  //and emphasize the filtered object(s)
+		  if (useMorphOps)
+			  morphOps(threshold);
+		  //pass in thresholded frame to our object tracking function
+		  //this function will return the x and y coordinates of the
+		  //filtered object
+		  if (trackObjects)
+			  trackFilteredObject(x, y, threshold, cameraFeed);
+
+      xc4 = x;
+      yc4 = y;
+      
+      inRange(HSV, Scalar(H_MINCEN, S_MINCEN, V_MINCEN), Scalar(H_MAXCEN, S_MAXCEN, V_MAXCEN), threshold);
+		  //perform morphological operations on thresholded image to eliminate noise
+		  //and emphasize the filtered object(s)
+		  if (useMorphOps)
+			  morphOps(threshold);
+		  //pass in thresholded frame to our object tracking function
+		  //this function will return the x and y coordinates of the
+		  //filtered object
+		  if (trackObjects)
+			  trackFilteredObject(x, y, threshold, cameraFeed);
+
+      xc5 = x;
+      yc5 = y;
+            
+      cout<<"Verde("<<xc1<<","<<" "<<yc1<<")"<<endl;
+      cout<<"Albastru("<<xc2<<","<<" "<<yc2<<")"<<endl;
+      cout<<"Rosu("<<xc3<<","<<" "<<yc3<<")"<<endl;
+      cout<<"Alb("<<xc3<<","<<" "<<yc3<<")"<<endl;
+      cout<<"Centru("<<xc3<<","<<" "<<yc3<<")"<<endl;
+      
 		  //show frames
 		  imshow(windowName2, threshold);
 		  imshow(windowName, cameraFeed);
