@@ -5,8 +5,12 @@
 #include "opencv2/highgui/highgui.hpp"
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
 
 
 // rosu ( red )
@@ -26,12 +30,12 @@
 #define V_MAXV 250
 
 // galben ( yellow )
-#define H_MING 
-#define H_MAXG 
-#define S_MING 
-#define S_MAXG 
-#define V_MING 
-#define V_MAXG 
+#define H_MING
+#define H_MAXG
+#define S_MING
+#define S_MAXG
+#define V_MING
+#define V_MAXG
 
 // albastru ( blue )
 #define H_MINA 92
@@ -249,11 +253,11 @@ int main(int argc, char* argv[])
 	//video capture object to acquire webcam feed
 	VideoCapture capture;
 	//open capture object at location zero (default location for webcam)
- 
- 
+
+
 	capture.open("rtmp://172.16.254.63/live/live");
- 
- 
+
+
 	//set height and width of capture frame
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, FRAME_WIDTH);
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT);
@@ -266,15 +270,52 @@ int main(int argc, char* argv[])
   int xc3;
   int xc4;
   int xc5;
-  
+
   int yc1;
   int yc2;
   int yc3;
   int yc4;
   int yc5;
-  
+
   // Socket socket = getSocket("TCP")
-  	
+    int sockfd, portno, n;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+
+    portno = 20231;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    server = gethostbyname("193.226.12.217");
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr,(char *)&serv_addr.sin_addr.s_addr,server->h_length);
+    serv_addr.sin_port = htons(portno);
+
+    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+        printf("ERROR connecting");
+
+    // COMENZI - mai trebuie sa ma gandesc la un algoritm - cum dau comenzile?
+    // as putea sa fac o functie cu prototipul:
+    /* void send_command(int sockfd, char command[], int sleep_sec) // comanda se da astfel: send_command(sockfd,"f\n",2) f/r/b/l/s
+       {
+            int n;
+            n = write(sockfd, command, 1);
+            if(n<0)
+            //echivalent
+            //if(write(sockfd, command, 1)<0)
+                printf("Error at writing to socket\n");
+            sleep(sleep_sec);
+       }
+    */
+    n = write(sockfd,"f\n",1);
+    sleep(2);
+        n = write(sockfd,"s\n",1);
+            sleep(2);
+        n = write(sockfd,"l\n",1);
+            sleep(1);
+        n = write(sockfd,"s\n",1);
+        if (n < 0)
+         printf("ERROR writing to socket");
+
 	while (1) {
 
 
@@ -303,7 +344,7 @@ int main(int argc, char* argv[])
 
       xc1 = x;
       yc1 = y;
-      
+
       inRange(HSV, Scalar(H_MINA, S_MINA, V_MINA), Scalar(H_MAXA, S_MAXA, V_MAXA), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
@@ -317,7 +358,7 @@ int main(int argc, char* argv[])
 
       xc2 = x;
       yc2 = y;
-      
+
       inRange(HSV, Scalar(H_MINR, S_MINR, V_MINR), Scalar(H_MAXR, S_MAXR, V_MAXR), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
@@ -331,7 +372,7 @@ int main(int argc, char* argv[])
 
       xc3 = x;
       yc3 = y;
-      
+
       inRange(HSV, Scalar(H_MINALB, S_MINALB, V_MINALB), Scalar(H_MAXALB, S_MAXALB, V_MAXALB), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
@@ -345,7 +386,7 @@ int main(int argc, char* argv[])
 
       xc4 = x;
       yc4 = y;
-      
+
       inRange(HSV, Scalar(H_MINCEN, S_MINCEN, V_MINCEN), Scalar(H_MAXCEN, S_MAXCEN, V_MAXCEN), threshold);
 		  //perform morphological operations on thresholded image to eliminate noise
 		  //and emphasize the filtered object(s)
@@ -359,13 +400,13 @@ int main(int argc, char* argv[])
 
       xc5 = x;
       yc5 = y;
-            
+
       cout<<"Verde("<<xc1<<","<<" "<<yc1<<")"<<endl;
       cout<<"Albastru("<<xc2<<","<<" "<<yc2<<")"<<endl;
       cout<<"Rosu("<<xc3<<","<<" "<<yc3<<")"<<endl;
       cout<<"Alb("<<xc3<<","<<" "<<yc3<<")"<<endl;
       cout<<"Centru("<<xc3<<","<<" "<<yc3<<")"<<endl;
-      
+
 		  //show frames
 		  imshow(windowName2, threshold);
 		  imshow(windowName, cameraFeed);
